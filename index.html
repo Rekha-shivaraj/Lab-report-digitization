@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Lab Report Digitizer</title>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background:#e7f3ff; margin:0; padding:0; }
+    .container { max-width:600px; background:white; margin:80px auto; border-radius:14px; padding:40px; box-shadow:0 5px 25px rgba(0,0,0,0.1); }
+    h1 { text-align:center; color:#0078D7; margin-bottom:20px; }
+    label { font-weight:bold; }
+    input[type=file] { margin:15px 0; width:100%; }
+    .btn { background:#0078D7; color:white; border:none; padding:10px 20px; border-radius:8px; font-size:16px; cursor:pointer; }
+    .btn:hover { background:#005fa3; }
+    a { margin-left:15px; color:#0078D7; text-decoration:none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Upload Your Lab Report</h1>
+    <form action="/analyze" method="post" enctype="multipart/form-data">
+      <label>Select report file (PDF or Image):</label><br>
+      <input type="file" name="report" accept=".pdf,image/*" required><br>
+      <button class="btn" type="submit">Analyze</button>
+      <a href="/reports">View Saved Reports</a>
+    </form>
+  </div>
+</body>
+</html>

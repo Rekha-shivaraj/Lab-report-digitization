@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Lab Report Summary</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #eaf6ff;
+      color: #333;
+      padding: 40px;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: #fff;
+      padding: 25px 30px;
+      border-radius: 14px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #0b5fa5;
+      text-align: center;
+      font-size: 28px;
+      margin-bottom: 5px;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .status {
+      text-align: center;
+      font-weight: bold;
+      font-size: 18px;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .status.normal { background: #d4f8d4; color: #087f23; }
+    .status.attention { background: #ffe1e1; color: #b00020; }
+
+    .test-card {
+      background: #f8faff;
+      border: 2px solid #e2e9f3;
+      border-left: 8px solid #0b5fa5;
+      border-radius: 10px;
+      padding: 10px 15px;
+      margin-bottom: 10px;
+    }
+    .test-card.attention { border-left-color: #ff4d4d; background: #ffecec; }
+    .test-card.normal { border-left-color: #2ecc71; background: #eafbee; }
+
+    .label { font-weight: bold; font-size: 17px; }
+    .value { float: right; font-size: 16px; }
+
+    .summary-box {
+      background: #f2f6ff;
+      border-radius: 12px;
+      padding: 15px;
+      margin-top: 20px;
+    }
+    .summary-title {
+      color: #0b5fa5;
+      font-weight: bold;
+      font-size: 18px;
+    }
+    .ai-icon { font-size: 20px; margin-right: 8px; }
+
+    .buttons { text-align: center; margin-top: 25px; }
+    button, a.btn {
+      padding: 10px 18px;
+      border: none;
+      border-radius: 8px;
+      margin: 8px;
+      cursor: pointer;
+      font-size: 15px;
+      transition: all 0.3s ease;
+    }
+    .speak-en { background: #0b5fa5; color: white; }
+    .speak-hi { background: #ffb84d; color: white; }
+    .show-hi { background: #f76b1c; color: white; }
+    .download-btn { background: #28a745; color: white; text-decoration: none; }
+    button:hover, .download-btn:hover { opacity: 0.9; }
+
+    .footer {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 14px;
+      color: gray;
+    }
+    #hindiSummary {
+      display: none;
+      margin-top: 15px;
+      padding: 10px;
+      background: #fff7e6;
+      border-radius: 10px;
+      border: 1px solid #f2c97d;
+      color: #5a3c00;
+      font-size: 17px;
+      white-space: pre-line;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🩺 Health Summary</h1>
+
+    {% if overall_status == 'normal' %}
+      <div class="status normal">✅ All values appear normal. No concern.</div>
+    {% else %}
+      <div class="status attention">⚠️ Some results need attention! Please consult a doctor.</div>
+    {% endif %}
+
+    <h2>Detailed Report</h2>
+
+    {% for key, val in summary.items() %}
+      <div class="test-card {{ val.status }}">
+        <div class="label">{{ key.replace('_', ' ').title() }}</div>
+        <div class="value">{{ val.value }} {{ val.unit }}</div>
+      </div>
+    {% endfor %}
+
+    <div class="summary-box">
+      <div class="summary-title"><span class="ai-icon">🤖</span>AI Summary:</div>
+      <p id="englishSummary" style="white-space: pre-line; margin-top: 10px;">{{ summary_text }}</p>
+      <p id="hindiSummary"></p>
+    </div>
+
+    <div class="buttons">
+      <button class="speak-en" onclick="speakReport('en')">🔊 Hear My Report (English)</button>
+      <button class="speak-hi" onclick="speakReport('hi')">🗣️ Hear My Report (Hindi)</button>
+      <button class="show-hi" onclick="showHindiSummary()">🈶 Show Hindi Summary</button>
+      <a href="/" class="download-btn">⬅️ Upload Another Report</a>
+    </div>
+
+    <audio id="audioPlayer" controls style="display:none;"></audio>
+
+    <div class="footer">Made with ❤️ to help elders understand their health easily.</div>
+  </div>
+
+  <script>
+    async function speakReport(lang) {
+      const text = { summary_text,tojson };
+      const res = await fetch('/speak', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ text, lang })
+      });
+      const data = await res.json();
+      if (data.ok) {
+        const audio = document.getElementById('audioPlayer');
+        audio.src = data.url + '?t=' + Date.now();
+        audio.style.display = 'block';
+        audio.play();
+      } else {
+        alert('Error: Could not play the report.');
+      }
+    }
+
+    async function showHindiSummary() {
+      const text = { summary_texttojson };
+      const res = await fetch('/translate_hindi', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ text })
+      });
+      const data = await res.json();
+      if (data.ok) {
+        const box = document.getElementById('hindiSummary');
+        box.textContent = data.hindi;
+        box.style.display = 'block';
+      } else {
+        alert('Error translating summary.');
+      }
+    }
+  </script>
+</body>
+</html>
