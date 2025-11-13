@@ -1,178 +1,121 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <title>Lab Report Summary</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>{{ report_type }} Summary</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #eaf6ff;
-      color: #333;
-      padding: 40px;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #e0f2fe, #f9fafb);
+      margin: 0; padding: 36px; color: #1e293b;
     }
     .container {
-      max-width: 800px;
-      margin: auto;
-      background: #fff;
-      padding: 25px 30px;
-      border-radius: 14px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+      max-width: 900px; margin: auto;
+      background: #fff; padding: 28px; border-radius: 18px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
     }
-    h1 {
-      color: #0b5fa5;
-      text-align: center;
-      font-size: 28px;
-      margin-bottom: 5px;
-    }
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .status {
-      text-align: center;
-      font-weight: bold;
-      font-size: 18px;
-      padding: 10px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-    }
-    .status.normal { background: #d4f8d4; color: #087f23; }
-    .status.attention { background: #ffe1e1; color: #b00020; }
+    h1 { text-align:center; color:#2563eb; margin-bottom:8px; font-size:30px; }
+    .status { text-align:center; padding:12px; border-radius:10px; font-weight:600; margin:18px 0; text-transform:capitalize; }
+    .status.normal { background:#dcfce7; color:#166534; }
+    .status.attention { background:#fee2e2; color:#991b1b; }
 
-    .test-card {
-      background: #f8faff;
-      border: 2px solid #e2e9f3;
-      border-left: 8px solid #0b5fa5;
-      border-radius: 10px;
-      padding: 10px 15px;
-      margin-bottom: 10px;
-    }
-    .test-card.attention { border-left-color: #ff4d4d; background: #ffecec; }
-    .test-card.normal { border-left-color: #2ecc71; background: #eafbee; }
-
-    .label { font-weight: bold; font-size: 17px; }
-    .value { float: right; font-size: 16px; }
-
-    .summary-box {
-      background: #f2f6ff;
-      border-radius: 12px;
-      padding: 15px;
-      margin-top: 20px;
-    }
-    .summary-title {
-      color: #0b5fa5;
-      font-weight: bold;
-      font-size: 18px;
-    }
-    .ai-icon { font-size: 20px; margin-right: 8px; }
-
-    .buttons { text-align: center; margin-top: 25px; }
+    .summary-box { background:#f8fafc; border-left:6px solid #2563eb; padding:18px; border-radius:12px; margin-bottom:20px; line-height:1.6; font-size:17px; }
+    .chart-section { background:#f1f5f9; padding:20px; border-radius:12px; margin-bottom:22px; }
+    canvas { width:100% !important; height:360px !important; }
+    .buttons { text-align:center; margin-top:16px; }
     button, a.btn {
-      padding: 10px 18px;
-      border: none;
-      border-radius: 8px;
-      margin: 8px;
-      cursor: pointer;
-      font-size: 15px;
-      transition: all 0.3s ease;
+      background:#2563eb; color:white; padding:10px 20px; border-radius:10px; border:none; margin:8px; cursor:pointer; text-decoration:none;
     }
-    .speak-en { background: #0b5fa5; color: white; }
-    .speak-hi { background: #ffb84d; color: white; }
-    .show-hi { background: #f76b1c; color: white; }
-    .download-btn { background: #28a745; color: white; text-decoration: none; }
-    button:hover, .download-btn:hover { opacity: 0.9; }
-
-    .footer {
-      text-align: center;
-      margin-top: 20px;
-      font-size: 14px;
-      color: gray;
-    }
-    #hindiSummary {
-      display: none;
-      margin-top: 15px;
-      padding: 10px;
-      background: #fff7e6;
-      border-radius: 10px;
-      border: 1px solid #f2c97d;
-      color: #5a3c00;
-      font-size: 17px;
-      white-space: pre-line;
-    }
+    button:hover, a.btn:hover { background:#1e40af; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>🩺 Health Summary</h1>
+    <h1>{{ report_type }}</h1>
 
-    {% if overall_status == 'normal' %}
-      <div class="status normal">✅ All values appear normal. No concern.</div>
-    {% else %}
-      <div class="status attention">⚠️ Some results need attention! Please consult a doctor.</div>
+    <div class="status {{ overall_status }}">
+      {% if overall_status == 'normal' %}
+        ✅ All results appear normal.
+      {% else %}
+        ⚠️ Some results need attention.
+      {% endif %}
+    </div>
+
+    <div class="summary-box" id="summaryBox">
+      <strong>Summary:</strong><br>
+      <!-- render summary_text into DOM so JS can read it safely -->
+      <div id="summaryText">{{ summary_text }}</div>
+    </div>
+
+    {% if chart_data %}
+      <!-- Safe storage of JSON data in DOM (not inside JS code) -->
+      <script id="chart-data" type="application/json">{{ chart_data | tojson | safe }}</script>
+
+      <div class="chart-section">
+        <h3 style="text-align:center;color:#1e3a8a;margin-bottom:10px;">Test Results</h3>
+        <canvas id="labChart" aria-label="Lab test results chart" role="img"></canvas>
+      </div>
     {% endif %}
 
-    <h2>Detailed Report</h2>
-
-    {% for key, val in summary.items() %}
-      <div class="test-card {{ val.status }}">
-        <div class="label">{{ key.replace('_', ' ').title() }}</div>
-        <div class="value">{{ val.value }} {{ val.unit }}</div>
-      </div>
-    {% endfor %}
-
-    <div class="summary-box">
-      <div class="summary-title"><span class="ai-icon">🤖</span>AI Summary:</div>
-      <p id="englishSummary" style="white-space: pre-line; margin-top: 10px;">{{ summary_text }}</p>
-      <p id="hindiSummary"></p>
-    </div>
-
     <div class="buttons">
-      <button class="speak-en" onclick="speakReport('en')">🔊 Hear My Report (English)</button>
-      <button class="speak-hi" onclick="speakReport('hi')">🗣️ Hear My Report (Hindi)</button>
-      <button class="show-hi" onclick="showHindiSummary()">🈶 Show Hindi Summary</button>
-      <a href="/" class="download-btn">⬅️ Upload Another Report</a>
+      <button id="playBtn">🔊 Hear My Report</button>
+      <a href="/" class="btn">⬅️ Upload Another</a>
     </div>
-
-    <audio id="audioPlayer" controls style="display:none;"></audio>
-
-    <div class="footer">Made with ❤️ to help elders understand their health easily.</div>
   </div>
 
   <script>
-    async function speakReport(lang) {
-      const text = { summary_text,tojson };
-      const res = await fetch('/speak', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({ text, lang })
-      });
-      const data = await res.json();
-      if (data.ok) {
-        const audio = document.getElementById('audioPlayer');
-        audio.src = data.url + '?t=' + Date.now();
-        audio.style.display = 'block';
-        audio.play();
-      } else {
-        alert('Error: Could not play the report.');
-      }
+    // Read summary text safely from the DOM (NO tojson used here)
+    function speakReport() {
+      const summary = document.getElementById('summaryText').innerText || '';
+      if (!summary.trim()) { alert('No summary available to speak.'); return; }
+      const utter = new SpeechSynthesisUtterance(summary);
+      utter.lang = 'en-US';
+      utter.rate = 1.0;
+      speechSynthesis.speak(utter);
     }
 
-    async function showHindiSummary() {
-      const text = { summary_texttojson };
-      const res = await fetch('/translate_hindi', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({ text })
-      });
-      const data = await res.json();
-      if (data.ok) {
-        const box = document.getElementById('hindiSummary');
-        box.textContent = data.hindi;
-        box.style.display = 'block';
-      } else {
-        alert('Error translating summary.');
+    document.getElementById('playBtn').addEventListener('click', speakReport);
+
+    // Chart: get JSON from <script type="application/json"> and parse it
+    (function renderChartFromDOM() {
+      const script = document.getElementById('chart-data');
+      if (!script) return; // no chart data available
+
+      let chartData = [];
+      try {
+        chartData = JSON.parse(script.textContent || '[]');
+      } catch (err) {
+        console.error('Invalid chart JSON:', err);
+        return;
       }
-    }
+      if (!Array.isArray(chartData) || chartData.length === 0) return;
+
+      const labels = chartData.map(d => d.name || 'Test');
+      const values = chartData.map(d => (typeof d.value === 'number') ? d.value : 0);
+      const bgColors = chartData.map(d => (d.value < d.low || d.value > d.high) ? '#ef4444' : '#22c55e');
+
+      const ctx = document.getElementById('labChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Value',
+            data: values,
+            backgroundColor: bgColors,
+            borderRadius: 8
+          }]
+        },
+        options: {
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    })();
   </script>
 </body>
 </html>
