@@ -2,139 +2,451 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Health Report Summary</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analysis Results</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
       font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
-      padding: 40px;
-      color: #1e293b;
+      background: linear-gradient(135deg, #c7d2fe, #e0f2fe);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
     }
-    .container {
-      max-width: 850px;
-      margin: auto;
+
+    .result-box {
       background: white;
+      width: 90%;
+      max-width: 800px;
       padding: 30px;
-      border-radius: 20px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      border-radius: 16px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+      animation: fadeIn 0.8s ease;
     }
-    h1 {
-      text-align: center;
+
+    h2 {
       color: #2563eb;
-      font-size: 28px;
-    }
-    .status.normal { background: #dcfce7; color: #166534; }
-    .status.attention { background: #fee2e2; color: #991b1b; }
-    .status {
-      text-align: center;
-      padding: 12px;
-      border-radius: 10px;
-      font-weight: 600;
+      font-size: 24px;
       margin-bottom: 20px;
+      text-align: center;
     }
-    canvas { width: 100% !important; max-height: 350px !important; }
-    .summary {
-      background: #f8fafc;
+
+    .report-type {
+      background: #dbeafe;
+      color: #1d4ed8;
+      padding: 8px 16px;
+      border-radius: 20px;
+      display: inline-block;
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+
+    .section {
+      margin: 25px 0;
       padding: 20px;
       border-radius: 12px;
-      margin-bottom: 30px;
-      border-left: 6px solid #3b82f6;
+      background: #f8fafc;
     }
-    button, a.btn {
+
+    .section-title {
+      color: #2563eb;
+      font-size: 18px;
+      margin-bottom: 15px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #e2e8f0;
+    }
+
+    .values-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
+    }
+
+    .values-table th {
+      background: #dbeafe;
+      padding: 12px;
+      text-align: left;
+      font-weight: 600;
+    }
+
+    .values-table td {
+      padding: 12px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .values-table tr:hover {
+      background: #f1f5f9;
+    }
+
+    .status-normal {
+      color: #10b981;
+      font-weight: 600;
+    }
+
+    .status-high {
+      color: #ef4444;
+      font-weight: 600;
+    }
+
+    .status-low {
+      color: #f59e0b;
+      font-weight: 600;
+    }
+
+    .interpretation {
+      background: white;
+      border-left: 4px solid #3b82f6;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .findings {
+      background: #fffbeb;
+      border-left: 4px solid #f59e0b;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .error {
+      background: #fee2e2;
+      color: #b91c1c;
+      border-left: 4px solid #ef4444;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 24px;
       background: #2563eb;
       color: white;
-      padding: 10px 18px;
-      border-radius: 10px;
-      border: none;
       text-decoration: none;
-      margin: 8px;
+      border-radius: 8px;
+      font-weight: 600;
+      transition: background 0.3s ease;
+      border: none;
       cursor: pointer;
-      transition: 0.3s;
+      margin: 10px 5px;
+      text-align: center;
     }
-    button:hover, a.btn:hover { background: #1e3a8a; }
-    audio { display: none; margin-top: 15px; }
+
+    .btn:hover {
+      background: #1d4ed8;
+    }
+
+    .btn-secondary {
+      background: #64748b;
+    }
+
+    .btn-secondary:hover {
+      background: #475569;
+    }
+
+    .btn-success {
+      background: #10b981;
+    }
+
+    .btn-success:hover {
+      background: #059669;
+    }
+
+    .actions {
+      text-align: center;
+      margin-top: 30px;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .audio-player {
+      margin: 20px 0;
+      text-align: center;
+    }
+
+    .audio-controls {
+      display: none;
+      margin-top: 15px;
+    }
+
+    .no-results {
+      text-align: center;
+      color: #64748b;
+      font-style: italic;
+      padding: 20px;
+    }
+
+    .preventive-measures {
+      background: #f0fdf4;
+      border-left: 4px solid #10b981;
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .preventive-measures h4 {
+      color: #059669;
+      font-size: 15px;
+      margin: 0 0 10px 0;
+    }
+
+    .preventive-measures ul {
+      margin: 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+
+    .preventive-measures li {
+      margin: 6px 0;
+      color: #047857;
+      line-height: 1.5;
+    }
+
+    .doctor-warning {
+      background: #fef2f2;
+      border-left: 4px solid #ef4444;
+      padding: 12px 15px;
+      margin: 8px 0;
+      border-radius: 0 8px 8px 0;
+      font-weight: 600;
+      color: #b91c1c;
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Health Report Summary</h1>
-
-    <div class="status {{ overall_status }}">{{ overall_status }}</div>
-
-    <div class="summary" id="summaryBox">
-      <!-- render the summary text into the DOM (safe) -->
-      <div id="summaryText">{{ summary_text }}</div>
-    </div>
-
-    <!-- safe JSON container for chart data (only present if chart_data passed) -->
-    {% if chart_data %}
-      <script id="chart-data" type="application/json">{{ chart_data | tojson | safe }}</script>
-      <div class="chart-wrap">
-        <canvas id="labChart" aria-label="Lab test results chart" role="img"></canvas>
+  <div class="result-box">
+    <h2>📊 Lab Report Analysis</h2>
+    
+    {% if error %}
+      <div class="error">
+        <strong>Error:</strong> {{ error }}
+      </div>
+      <div class="actions">
+        <a href="/" class="btn btn-secondary">Upload Another Report</a>
       </div>
     {% else %}
-      <div style="text-align:center; color:#475569; margin-bottom:16px;">No chart data available for this report.</div>
+      {% if report_type %}
+        <div class="report-type">{{ report_type }}</div>
+      {% endif %}
+      
+      <!-- Extracted Values Section -->
+      <div class="section">
+        <h3 class="section-title">🔬 Extracted Values</h3>
+        {% if values %}
+          <!-- Graph -->
+          <div style="margin: 20px 0;">
+            <canvas id="valuesChart" style="max-height: 300px;"></canvas>
+          </div>
+          
+          <table class="values-table">
+            <thead>
+              <tr>
+                <th>Test</th>
+                <th>Value</th>
+                <th>Unit</th>
+                <th>Normal Range</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for name, data in values.items() %}
+              <tr>
+                <td>{{ name }}</td>
+                <td>{{ data.value }}</td>
+                <td>{{ data.unit }}</td>
+                <td>{{ data.low_normal }} - {{ data.high_normal }}</td>
+                <td class="status-{{ interpretations[name].status.lower() }}">{{ interpretations[name].status }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <div class="no-results">No measurable values were found in the report.</div>
+        {% endif %}
+      </div>
+      
+      <!-- Interpretations Section -->
+      {% if interpretations %}
+      <div class="section">
+        <h3 class="section-title">📝 Medical Interpretations & Analysis Needed</h3>
+        {% for name, interp in interpretations.items() %}
+          <div class="interpretation">
+            <strong>{{ name }}:</strong> {{ interp.status }}<br>
+            <small style="color: #475569; line-height: 1.6; display: block; margin-top: 8px;">{{ interp.interpretation }}</small>
+          </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      
+      <!-- Preventive Measures Section -->
+      {% if interpretations %}
+      <div class="section">
+        <h3 class="section-title">💊 Preventive Measures & Recommendations</h3>
+        {% for name, interp in interpretations.items() %}
+          {% if interp.preventive_measures %}
+            <div class="preventive-measures">
+              <h4>{{ name }} - {{ interp.status }}</h4>
+              <ul>
+                {% for measure in interp.preventive_measures %}
+                  {% if '⚠️ CONSULT' in measure %}
+                    <li class="doctor-warning">{{ measure }}</li>
+                  {% else %}
+                    <li>{{ measure }}</li>
+                  {% endif %}
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+      {% endif %}
+      
+      <!-- Audio Playback -->
+      <div class="audio-player">
+        <button id="speakBtn" class="btn btn-success">🔊 Listen to Full Report</button>
+        <div class="audio-controls" id="audioControls">
+          <audio id="audioPlayer" controls></audio>
+        </div>
+      </div>
+      
+      <div class="actions">
+        <a href="/" class="btn btn-secondary">Upload Another Report</a>
+        <a href="/reports" class="btn">View All Reports</a>
+        {% if report_id %}
+        <a href="/report/{{ report_id }}" class="btn">View This Report</a>
+        {% endif %}
+      </div>
     {% endif %}
-
-    <div style="text-align:center;">
-      <button id="speakBtn">🔊 Hear Report</button>
-      <a href="/" class="btn">⬅️ Upload Another</a>
-    </div>
-
-    <audio id="audioPlayer" controls></audio>
   </div>
 
   <script>
-    // SPEECH: read summary from DOM (no Jinja in JS)
-    document.getElementById('speakBtn').addEventListener('click', function () {
-      const summary = document.getElementById('summaryText').innerText || '';
-      if (!summary.trim()) {
-        alert('No summary available to speak.');
+    // Chart data passed from server
+    var chartDataJson = '{{ chart_data|tojson|safe }}';
+    var chartData = chartDataJson ? JSON.parse(chartDataJson) : null;
+    
+    if (chartData && chartData.labels && chartData.labels.length > 0) {
+      const ctx = document.getElementById('valuesChart');
+      if (ctx) {
+        new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: chartData.labels,
+            datasets: [{
+              label: 'Your Values',
+              data: chartData.values,
+              backgroundColor: chartData.colors,
+              borderColor: chartData.colors.map(c => c.replace('0.8', '1')),
+              borderWidth: 2
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+              legend: {
+                display: true,
+                position: 'top'
+              },
+              title: {
+                display: true,
+                text: 'Test Results Overview'
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: 'Values'
+                }
+              }
+            }
+          }
+        });
+      }
+    }
+    
+    document.getElementById('speakBtn').addEventListener('click', function() {
+      // Create a summary that reads the actual values
+      let summaryText = '';
+      
+      // Add report type
+      const reportType = document.querySelector('.report-type');
+      if (reportType) {
+        summaryText += 'This is a ' + reportType.textContent + '. ';
+      }
+      
+      // Add extracted values
+      const valuesTable = document.querySelector('.values-table');
+      if (valuesTable) {
+        summaryText += 'Test results: ';
+        const rows = valuesTable.querySelectorAll('tbody tr');
+        rows.forEach(row => {
+          const cells = row.querySelectorAll('td');
+          if (cells.length >= 4) {
+            const testName = cells[0].textContent;
+            const value = cells[1].textContent;
+            const unit = cells[2].textContent;
+            const status = cells[4].textContent;
+            
+            // Read all values but emphasize abnormal ones
+            summaryText += `${testName}: ${value} ${unit}. `;
+            
+            // Add status information for abnormal values
+            if (status === 'High' || status === 'Low') {
+              summaryText += `This value is ${status.toLowerCase()}. `;
+            }
+          }
+        });
+      }
+      
+      // Add any additional findings
+      const findings = document.querySelectorAll('.findings');
+      if (findings.length > 0) {
+        summaryText += 'Additional notes: ';
+        findings.forEach(finding => {
+          summaryText += finding.textContent + ' ';
+        });
+      }
+      
+      if (!summaryText.trim()) {
+        alert('No summary content to speak');
         return;
       }
-      const utter = new SpeechSynthesisUtterance(summary);
-      utter.lang = 'en-US';
-      utter.rate = 1;
-      speechSynthesis.speak(utter);
-    });
-
-    // CHART: parse JSON from <script type="application/json"> safely
-    (function renderChart() {
-      const script = document.getElementById('chart-data');
-      if (!script) return; // no chart data passed
-
-      let chartData = [];
-      try {
-        chartData = JSON.parse(script.textContent || '[]');
-      } catch (err) {
-        console.error('Invalid chart JSON:', err);
-        return;
-      }
-      if (!Array.isArray(chartData) || chartData.length === 0) return;
-
-      const labels = chartData.map(d => d.name || 'Test');
-      const values = chartData.map(d => (typeof d.value === 'number') ? d.value : 0);
-      const bgColors = chartData.map(d => (d.value < d.low || d.value > d.high) ? '#ef4444' : '#22c55e');
-
-      const ctx = document.getElementById('labChart').getContext('2d');
-      new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: labels,
-          datasets: [{
-            label: 'Value',
-            data: values,
-            backgroundColor: bgColors,
-            borderRadius: 8
-          }]
-        },
-        options: {
-          plugins: { legend: { display: false } },
-          scales: { y: { beginAtZero: true } }
+      
+      // Send request to the speak endpoint
+      const formData = new FormData();
+      formData.append('text', summaryText);
+      formData.append('lang', 'en');
+      
+      fetch('/speak', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.ok && data.url) {
+          const audioPlayer = document.getElementById('audioPlayer');
+          audioPlayer.src = data.url;
+          document.getElementById('audioControls').style.display = 'block';
+          audioPlayer.play();
+        } else {
+          alert('Failed to generate audio: ' + (data.error || 'Unknown error'));
         }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to generate audio');
       });
-    })();
+    });
   </script>
 </body>
 </html>
