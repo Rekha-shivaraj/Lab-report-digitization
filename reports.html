@@ -3,40 +3,181 @@
 <head>
   <meta charset="utf-8"/>
   <title>Saved Reports</title>
-  <link rel="stylesheet" href="/static/css/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #c7d2fe, #e0f2fe);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      width: 90%;
+      max-width: 900px;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      color: #2563eb;
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+
+    .lead {
+      color: #64748b;
+      font-size: 16px;
+      margin-bottom: 25px;
+    }
+
+    .reports-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+
+    .reports-table th {
+      background: #dbeafe;
+      padding: 14px;
+      text-align: left;
+      font-weight: 600;
+      color: #1e40af;
+    }
+
+    .reports-table td {
+      padding: 14px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .reports-table tr:hover {
+      background: #f1f5f9;
+    }
+
+    .report-type-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .badge-lab {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .badge-mri {
+      background: #fce7f3;
+      color: #be185d;
+    }
+
+    .badge-ecg {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .badge-eeg {
+      background: #e0e7ff;
+      color: #3730a3;
+    }
+
+    .view-link {
+      color: #2563eb;
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.3s ease;
+    }
+
+    .view-link:hover {
+      color: #1d4ed8;
+      text-decoration: underline;
+    }
+
+    .home-link {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 12px 24px;
+      background: #2563eb;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      transition: background 0.3s ease;
+      font-weight: 600;
+    }
+
+    .home-link:hover {
+      background: #1d4ed8;
+    }
+
+    .no-reports {
+      text-align: center;
+      color: #64748b;
+      padding: 60px 20px;
+      font-size: 18px;
+    }
+
+    .no-reports-icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+    }
+  </style>
 </head>
 <body>
-  <div class="site-wrap">
-    <main class="container">
-      <header class="hero small">
-        <div class="hero-left">
-          <h1>Saved Reports</h1>
-          <p class="lead">All stored reports (click to view details)</p>
-        </div>
-      </header>
+  <div class="container">
+    <h1>📚 Saved Lab Reports</h1>
+    <p class="lead">All your analyzed lab reports in one place</p>
 
-      <section class="list">
-        {% if reports %}
-          <table class="simple-table">
-            <tr><th>ID</th><th>File</th><th>Uploaded</th><th>Action</th></tr>
-            {% for r in reports %}
-              <tr>
-                <td>{{ r[0] }}</td>
-                <td>{{ r[1] }}</td>
-                <td>{{ r[2][:19].replace('T',' ') }}</td>
-                <td><a href="/report/{{ r[0] }}">View</a></td>
-              </tr>
-            {% endfor %}
-          </table>
-        {% else %}
-          <p>No saved reports yet.</p>
-        {% endif %}
-      </section>
-
-      <div class="bottom-row">
-        <a class="home-link" href="/">← Back to Home</a>
+    {% if reports %}
+      <table class="reports-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Filename</th>
+            <th>Report Type</th>
+            <th>Upload Date</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for report in reports %}
+          <tr>
+            <td>#{{ report['id'] }}</td>
+            <td>{{ report['filename'] }}</td>
+            <td>
+              {% if 'EEG' in report['report_type'] %}
+                <span class="report-type-badge badge-eeg">{{ report['report_type'] }}</span>
+              {% elif 'MRI' in report['report_type'] %}
+                <span class="report-type-badge badge-mri">{{ report['report_type'] }}</span>
+              {% elif 'ECG' in report['report_type'] %}
+                <span class="report-type-badge badge-ecg">{{ report['report_type'] }}</span>
+              {% else %}
+                <span class="report-type-badge badge-lab">{{ report['report_type'] }}</span>
+              {% endif %}
+            </td>
+            <td>{{ report['upload_date'][:19].replace('T', ' ') }}</td>
+            <td><a href="/report/{{ report['id'] }}" class="view-link">View Details →</a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <div class="no-reports">
+        <div class="no-reports-icon">📭</div>
+        <p>No reports uploaded yet.</p>
+        <p style="font-size: 16px; color: #94a3b8; margin-top: 10px;">Upload your first lab report to get started!</p>
       </div>
-    </main>
+    {% endif %}
+
+    <div style="text-align: center;">
+      <a class="home-link" href="/">← Upload New Report</a>
+    </div>
   </div>
 </body>
 </html>
