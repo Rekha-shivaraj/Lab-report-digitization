@@ -3,41 +3,169 @@
 <head>
   <meta charset="utf-8"/>
   <title>Report Details</title>
-  <link rel="stylesheet" href="/static/css/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #c7d2fe, #e0f2fe);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      width: 90%;
+      max-width: 800px;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      color: #2563eb;
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    .meta {
+      background: #f8fafc;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 15px 0;
+    }
+
+    .meta p {
+      margin: 8px 0;
+      color: #334155;
+    }
+
+    .meta strong {
+      color: #1e40af;
+    }
+
+    .values-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+
+    .values-table th {
+      background: #dbeafe;
+      padding: 12px;
+      text-align: left;
+      font-weight: 600;
+    }
+
+    .values-table td {
+      padding: 12px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .values-table tr:hover {
+      background: #f1f5f9;
+    }
+
+    .status-normal {
+      color: #10b981;
+      font-weight: 600;
+    }
+
+    .status-high {
+      color: #ef4444;
+      font-weight: 600;
+    }
+
+    .status-low {
+      color: #f59e0b;
+      font-weight: 600;
+    }
+
+    .findings {
+      background: #fffbeb;
+      border-left: 4px solid #f59e0b;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .home-link {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: #64748b;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      transition: background 0.3s ease;
+    }
+
+    .home-link:hover {
+      background: #475569;
+    }
+
+    .no-data {
+      text-align: center;
+      color: #64748b;
+      padding: 40px;
+      font-size: 18px;
+    }
+  </style>
 </head>
 <body>
-  <div class="site-wrap">
-    <main class="container">
-      <header class="hero small">
-        <h1>Report Details</h1>
-      </header>
+  <div class="container">
+    <h1>📋 Report Details</h1>
 
-      {% if report %}
-        <section class="meta">
-          <p><strong>Filename:</strong> {{ report[1] }}</p>
-          <p><strong>Uploaded:</strong> {{ report[2][:19].replace('T',' ') }}</p>
-        </section>
+    {% if report %}
+      <div class="meta">
+        <p><strong>Filename:</strong> {{ report['filename'] }}</p>
+        <p><strong>Upload Date:</strong> {{ report['upload_date'][:19].replace('T',' ') }}</p>
+        <p><strong>Report Type:</strong> {{ report['report_type'] }}</p>
+      </div>
 
-        <section class="values">
-          {% if values %}
-            <table class="simple-table">
-              <tr><th>Test</th><th>Value</th><th>Unit</th></tr>
-              {% for v in values %}
-                <tr><td>{{ v[1] }}</td><td>{{ v[2] }}</td><td>{{ v[3] }}</td></tr>
-              {% endfor %}
-            </table>
-          {% else %}
-            <p>No values saved for this report.</p>
-          {% endif %}
-        </section>
+      {% if values %}
+        <h2 style="color: #2563eb; font-size: 18px; margin-top: 25px;">Test Values</h2>
+        <table class="values-table">
+          <thead>
+            <tr>
+              <th>Test</th>
+              <th>Value</th>
+              <th>Unit</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for value in values %}
+            <tr>
+              <td>{{ value['test_name'] }}</td>
+              <td>{{ value['value'] }}</td>
+              <td>{{ value['unit'] }}</td>
+              <td class="status-{{ value['status'].lower() }}">{{ value['status'] }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       {% else %}
-        <p>Report not found.</p>
+        <p style="text-align: center; color: #64748b; margin: 20px 0;">No test values found for this report.</p>
       {% endif %}
 
-      <div class="bottom-row">
-        <a class="home-link" href="/reports">← Back to Reports</a>
-      </div>
-    </main>
+      {% if findings %}
+        <h2 style="color: #2563eb; font-size: 18px; margin-top: 25px;">Additional Findings</h2>
+        {% for finding in findings %}
+          <div class="findings">{{ finding['finding'] }}</div>
+        {% endfor %}
+      {% endif %}
+    {% else %}
+      <div class="no-data">Report not found.</div>
+    {% endif %}
+
+    <div style="text-align: center;">
+      <a class="home-link" href="/reports">← Back to All Reports</a>
+      <a class="home-link" href="/" style="margin-left: 10px;">Upload New Report</a>
+    </div>
   </div>
 </body>
 </html>
